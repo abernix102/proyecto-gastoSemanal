@@ -22,7 +22,8 @@ class Presupuesto {
     this.gastos = [];
   }
   nuevoGasto(gasto) {
-    this.gastos = [...this.gastos, gasto];
+   this.gastos = [...this.gastos, gasto]
+   console.log(this.gastos)
   }
 }
 
@@ -47,6 +48,9 @@ class UI {
     }, 3000);
   }
   agregarGastoListado(gastos) {
+    while(gastoListado.firstChild){
+      gastoListado.removeChild(gastoListado.firstChild)
+    }
     gastos.forEach(element => {
       const { cantidad, nombre, id } = element;
       const nuevoGasto = document.createElement("li");
@@ -58,11 +62,12 @@ class UI {
       //crea el span para el badge
       const span = document.createElement("span");
       span.classList = "badge badge-primary badge-pill";
-      span.textContent = cantidad;
+      span.textContent = `$${cantidad}`;
       nuevoGasto.appendChild(nombreTexto);
       nuevoGasto.appendChild(span);
       //btn para borrar
       const btnBorrar = document.createElement("button");
+      btnBorrar.textContent = "x"
       btnBorrar.classList.add("btn", "btn-danger", "borrar-gasto");
       nuevoGasto.appendChild(btnBorrar);
 
@@ -77,6 +82,7 @@ let presupuesto;
 //functiones
 function preguntarPresupuesto() {
   dialog.showModal();
+  dialog.addEventListener("cancel", (e) => e.preventDefault());
 
   closeButton.disabled = true;
 
