@@ -9,6 +9,7 @@ eventListener();
 function eventListener() {
   document.addEventListener("DOMContentLoaded", preguntarPresupuesto);
   formulario.addEventListener("submit", guardarDatos);
+  gastoListado.addEventListener("click", eliminarGasto)
 }
 
 dialog.style.position = "fixed";
@@ -22,8 +23,15 @@ class Presupuesto {
     this.gastos = [];
   }
   nuevoGasto(gasto) {
-   this.gastos = [...this.gastos, gasto]
-   console.log(this.gastos)
+    this.gastos = [...this.gastos, gasto];
+    this.calcularRestante();
+  }
+  calcularRestante() {
+    const restanteNew = this.gastos.reduce(
+      (total, gasto) => total + gasto.cantidad,
+      0
+    );
+    this.restante = this.restante - restanteNew;
   }
 }
 
@@ -48,8 +56,8 @@ class UI {
     }, 3000);
   }
   agregarGastoListado(gastos) {
-    while(gastoListado.firstChild){
-      gastoListado.removeChild(gastoListado.firstChild)
+    while (gastoListado.firstChild) {
+      gastoListado.removeChild(gastoListado.firstChild);
     }
     gastos.forEach(element => {
       const { cantidad, nombre, id } = element;
@@ -67,12 +75,15 @@ class UI {
       nuevoGasto.appendChild(span);
       //btn para borrar
       const btnBorrar = document.createElement("button");
-      btnBorrar.textContent = "x"
+      btnBorrar.textContent = "borrar";
       btnBorrar.classList.add("btn", "btn-danger", "borrar-gasto");
       nuevoGasto.appendChild(btnBorrar);
 
       gastoListado.appendChild(nuevoGasto);
     });
+  }
+  actulizarRestante(restante){
+    document.querySelector("#restante").textContent = restante;
   }
 }
 
@@ -82,7 +93,7 @@ let presupuesto;
 //functiones
 function preguntarPresupuesto() {
   dialog.showModal();
-  dialog.addEventListener("cancel", (e) => e.preventDefault());
+  dialog.addEventListener("cancel", e => e.preventDefault());
 
   closeButton.disabled = true;
 
@@ -112,9 +123,20 @@ function guardarDatos(e) {
     return;
   }
 
-  const gasto = { nombre, cantidad, id: Date.now() };
+  const gasto = { nombre, cantidad: Number(cantidad), id: Date.now() };
+
   presupuesto.nuevoGasto(gasto);
   ui.imprimitAlerta("Gasto agregado con exito");
-  ui.agregarGastoListado(presupuesto.gastos); // ← esto sí le pasa el array completo
+  ui.agregarGastoListado(presupuesto.gastos);
+  ui.actulizarRestante(presupuesto.restante) // ← esto sí le pasa el array completo
   formulario.reset();
+  console.log(presupuesto)
+}
+
+function eliminarGasto(e){
+  e.preventDefault();
+  if(e.target.classList.contains("borrar-gasto")){
+    const gastoId = Number(e.target.parentElement.dataset.id);
+    presupuesto.gastos = presupuesto.gastos.filter(gasto => gasto.id !== gastoId);
+  }
 }
